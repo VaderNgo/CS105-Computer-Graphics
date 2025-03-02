@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Graphics - Rasterization Tool</title>
+    <style>
+        :root {
+            --primary: #3f51b5;
+            --primary-light: #757de8;
+            --primary-dark: #002984;
+            --accent: #ff4081;
+            --text-on-dark: #ffffff;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --background: #f5f5f5;
+            --card-bg: #ffffff;
+            --border: #e0e0e0;
+            --radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .heading {
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1, h3 {
+            color: var(--primary-dark);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        h3 {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        a {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+        
+        .controls-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.75rem 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: var(--accent);
+            color: var(--text-on-dark);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s, transform 0.2s;
+            outline: none;
+            white-space: nowrap;
+        }
+        
+        button:hover {
+            background-color: #ff6b9f;
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        select {
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background-color: var(--card-bg);
+            width: 220px;
+            outline: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        select:focus {
+            border-color: var(--primary);
+        }
+        
+        .radius-control {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-color: var(--card-bg);
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .radius-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        .radius-value {
+            font-weight: bold;
+            color: var(--primary);
+            min-width: 2rem;
+            text-align: center;
+        }
+        
+        .slider {
+            width: 150px;
+            height: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+            border-radius: 5px;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+        }
+        
+        .radius-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .radius-buttons button {
+            padding: 0.3rem 0.7rem;
+            font-size: 1rem;
+            min-width: 2rem;
+            background-color: var(--primary);
+        }
+        
+        .radius-buttons button:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .canvas-container {
+            flex: 1;
+            margin-top: 0.75rem;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            min-height: 70vh; 
+        }
+        
+        canvas {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .guidelines-popup {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 100;
+        }
+        
+        .guidelines-button {
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .guidelines-content {
+            position: absolute;
+            bottom: 50px;
+            right: 0;
+            width: 300px;
+            background-color: white;
+            padding: 1rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: none;
+        }
+        
+        .guidelines-button:hover + .guidelines-content,
+        .guidelines-content:hover {
+            display: block;
+        }
+        
+        .tab {
+            margin-left: 1rem;
+            padding: 0.4rem 0;
+            border-left: 3px solid var(--primary-light);
+            padding-left: 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .tab i {
+            display: block;
+            margin-top: 0.3rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+        
+        .guideline-section {
+            margin-bottom: 0.75rem;
+        }
+        
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .controls-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            select, .radius-control {
+                width: 100%;
+            }
+            
+            .radius-control {
+                flex-wrap: wrap;
+            }
+            
+            .canvas-container {
+                min-height: 60vh;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .canvas-container {
+                padding: 0.5rem;
+                min-height: 50vh;
+            }
+            
+            .radius-buttons button {
+                padding: 0.4rem 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="heading">
+            <h1>Computer Graphics - Rasterization</h1>
+            <h3>UIT - Ngo Duc Loc - 22520790</h3>
+            <a href="https://github.com/VaderNgo/CS105-Computer-Graphics/tree/main/Homeworks/Lab_01">← Return to Home</a>
+        </div>
+        
+        <div class="controls-bar">
+            <button id="reset">Reset Canvas</button>
+            
+            <select id="algorithm">
+                <option value="DDA">(Line) DDA Algorithm</option>
+                <option value="Bresenham">(Line) Bresenham Algorithm</option>
+                <option value="CircleMidpoint">(Circle) Mid-Point Algorithm</option>
+            </select>
+            
+            <div id="radius-input-container" class="radius-control" style="display: none;">
+                <div class="radius-label">
+                    <label id="radius-label" for="radius-slider">Radius:</label>
+                    <span id="radius-value" class="radius-value">1</span>
+                </div>
+                <input type="range" id="radius-slider" name="slider" min="1" max="800" value="1" class="slider">
+                <div class="radius-buttons">
+                    <button id="decrease-slider-value-button">-</button>
+                    <button id="increase-slider-value-button">+</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <div class="guidelines-popup">
+            <div class="guidelines-button">?</div>
+            <div class="guidelines-content">
+                <b>Guidelines:</b>
+                <div class="guideline-section">
+                    * To draw the Line:
+                    <div class="tab">
+                        - Step 1: Select line algorithm<br>
+                        - Step 2: Click to set Point A, then Point B<br>
+                        <i>Line will be drawn automatically</i>
+                    </div>
+                </div>
+                
+                <div class="guideline-section">
+                    * To draw the Circle:
+                    <div class="tab">
+                        - Step 1: Select circle algorithm<br>
+                        - Step 2: Set radius with slider or buttons<br>
+                        - Step 3: Click to set center point<br>
+                        <i>Circle will be drawn automatically</i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        Computer Graphics Course Project &copy; 2024
+    </footer>
+
+    <script type="module" src="src/main.js"></script>
+    <script>
+        window.addEventListener('load', function() {
+            const canvas = document.getElementById('canvas');
+            const container = document.querySelector('.canvas-container');
+            
+            canvas.width = 800;
+            canvas.height = 600;
+            
+            function resizeCanvas() {
+                const containerWidth = container.clientWidth - 20; // Account for padding
+                const containerHeight = container.clientHeight - 20;
+                
+                const scaleWidth = containerWidth / canvas.width;
+                const scaleHeight = containerHeight / canvas.height;
+                const scale = Math.min(scaleWidth, scaleHeight);
+                
+                if (scale < 1) {
+                    canvas.style.width = (canvas.width * scale) + 'px';
+                    canvas.style.height = (canvas.height * scale) + 'px';
+                } else {
+                    canvas.style.width = canvas.width + 'px';
+                    canvas.style.height = canvas.height + 'px';
+                }
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        });
+    </script>
+</body>
+</html>
