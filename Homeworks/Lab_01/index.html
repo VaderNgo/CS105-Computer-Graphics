@@ -52,7 +52,7 @@
             border-bottom: 1px solid var(--border);
         }
         
-        h1, h3 {
+        h1, h2, h3 {
             color: var(--primary-dark);
             text-align: center;
         }
@@ -61,6 +61,12 @@
             font-size: clamp(1.5rem, 5vw, 2.2rem);
             font-weight: 700;
             margin-bottom: 0.25rem;
+        }
+        
+        h2 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            font-weight: 600;
+            margin: 0.5rem 0;
         }
         
         h3 {
@@ -84,12 +90,35 @@
             text-decoration: underline;
         }
         
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 992px) {
+            .main-content {
+                flex-direction: row;
+            }
+        }
+        
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
         .controls-bar {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin: 0.75rem 0;
+            margin: 0.5rem 0;
             flex-wrap: wrap;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
         }
         
         button {
@@ -197,7 +226,6 @@
         
         .canvas-container {
             flex: 1;
-            margin-top: 0.75rem;
             background-color: var(--card-bg);
             border-radius: var(--radius);
             padding: 0.75rem;
@@ -206,7 +234,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            min-height: 70vh; 
+            min-height: 60vh; 
         }
         
         canvas {
@@ -217,62 +245,70 @@
             object-fit: contain;
         }
         
-        .guidelines-popup {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            z-index: 100;
+        .right-panel {
+            width: 100%;
+            max-width: 300px;
         }
         
-        .guidelines-button {
-            background-color: var(--primary);
-            color: white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .guidelines-content {
-            position: absolute;
-            bottom: 50px;
-            right: 0;
-            width: 300px;
-            background-color: white;
-            padding: 1rem;
+        .guidelines {
+            background-color: var(--card-bg);
             border-radius: var(--radius);
+            padding: 1rem;
             box-shadow: var(--shadow);
-            display: none;
         }
         
-        .guidelines-button:hover + .guidelines-content,
-        .guidelines-content:hover {
-            display: block;
-        }
-        
-        .tab {
-            margin-left: 1rem;
-            padding: 0.4rem 0;
-            border-left: 3px solid var(--primary-light);
-            padding-left: 0.75rem;
-            font-size: 0.9rem;
-        }
-        
-        .tab i {
-            display: block;
-            margin-top: 0.3rem;
-            color: var(--text-secondary);
-            font-style: italic;
-            font-size: 0.85rem;
+        .guidelines h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            text-align: left;
         }
         
         .guideline-section {
-            margin-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .guideline-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .guideline-section h3 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .step-list {
+            list-style: none;
+            padding-left: 0.5rem;
+        }
+        
+        .step-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .step-list li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 0.5rem;
+            height: 0.5rem;
+            background-color: var(--primary-light);
+            border-radius: 50%;
+        }
+        
+        .note {
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+            font-size: 0.9rem;
         }
         
         footer {
@@ -280,7 +316,13 @@
             font-size: 0.8rem;
             color: var(--text-secondary);
             padding: 0.5rem;
-            margin-top: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 991px) {
+            .right-panel {
+                max-width: 100%;
+            }
         }
         
         @media (max-width: 768px) {
@@ -298,7 +340,7 @@
             }
             
             .canvas-container {
-                min-height: 60vh;
+                min-height: 50vh;
             }
         }
         
@@ -309,7 +351,7 @@
             
             .canvas-container {
                 padding: 0.5rem;
-                min-height: 50vh;
+                min-height: 40vh;
             }
             
             .radius-buttons button {
@@ -327,52 +369,66 @@
             <a href="https://github.com/VaderNgo/CS105-Computer-Graphics/tree/main/Homeworks/Lab_01">← Return to Home</a>
         </div>
         
-        <div class="controls-bar">
-            <button id="reset">Reset Canvas</button>
-            
-            <select id="algorithm">
-                <option value="DDA">(Line) DDA Algorithm</option>
-                <option value="Bresenham">(Line) Bresenham Algorithm</option>
-                <option value="CircleMidpoint">(Circle) Mid-Point Algorithm</option>
-            </select>
-            
-            <div id="radius-input-container" class="radius-control" style="display: none;">
-                <div class="radius-label">
-                    <label id="radius-label" for="radius-slider">Radius:</label>
-                    <span id="radius-value" class="radius-value">1</span>
-                </div>
-                <input type="range" id="radius-slider" name="slider" min="1" max="800" value="1" class="slider">
-                <div class="radius-buttons">
-                    <button id="decrease-slider-value-button">-</button>
-                    <button id="increase-slider-value-button">+</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="canvas-container">
-            <canvas id="canvas"></canvas>
-        </div>
-        
-        <div class="guidelines-popup">
-            <div class="guidelines-button">?</div>
-            <div class="guidelines-content">
-                <b>Guidelines:</b>
-                <div class="guideline-section">
-                    * To draw the Line:
-                    <div class="tab">
-                        - Step 1: Select line algorithm<br>
-                        - Step 2: Click to set Point A, then Point B<br>
-                        <i>Line will be drawn automatically</i>
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="controls-bar">
+                    <button id="reset">Reset Canvas</button>
+                    
+                    <select id="algorithm">
+                        <option value="DDA">(Line) DDA Algorithm</option>
+                        <option value="Bresenham">(Line) Bresenham Algorithm</option>
+                        <option value="CircleMidpoint">(Circle) Mid-Point Algorithm</option>
+                    </select>
+                    
+                    <div id="radius-input-container" class="radius-control" style="display: none;">
+                        <div class="radius-label">
+                            <label id="radius-label" for="radius-slider">Radius:</label>
+                            <span id="radius-value" class="radius-value">1</span>
+                        </div>
+                        <input type="range" id="radius-slider" name="slider" min="1" max="800" value="1" class="slider">
+                        <div class="radius-buttons">
+                            <button id="decrease-slider-value-button">-</button>
+                            <button id="increase-slider-value-button">+</button>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="guideline-section">
-                    * To draw the Circle:
-                    <div class="tab">
-                        - Step 1: Select circle algorithm<br>
-                        - Step 2: Set radius with slider or buttons<br>
-                        - Step 3: Click to set center point<br>
-                        <i>Circle will be drawn automatically</i>
+                <div class="canvas-container">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="guidelines">
+                    <h2>Guidelines</h2>
+                    
+                    <div class="guideline-section">
+                        <h3>Drawing a Line</h3>
+                        <ol class="step-list">
+                            <li>Select line algorithm (DDA or Bresenham)</li>
+                            <li>Click on the canvas to set Point A</li>
+                            <li>Click again to set Point B</li>
+                        </ol>
+                        <p class="note">The line will be drawn automatically after setting both points</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h3>Drawing a Circle</h3>
+                        <ol class="step-list">
+                            <li>Select circle algorithm (Mid-Point)</li>
+                            <li>Set the desired radius using the slider or +/- buttons</li>
+                            <li>Click on the canvas to set the center point</li>
+                        </ol>
+                        <p class="note">The circle will be drawn automatically after setting the center</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h3>Tips</h3>
+                        <ul class="step-list">
+                            <li>Use the Reset button to clear the canvas</li>
+                            <li>You can draw multiple shapes on the same canvas</li>
+                            <li>For better precision, click carefully on the desired locations</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -388,7 +444,15 @@
         window.addEventListener('load', function() {
             const canvas = document.getElementById('canvas');
             const container = document.querySelector('.canvas-container');
+            const algorithmSelect = document.getElementById('algorithm');
+            const radiusContainer = document.getElementById('radius-input-container');
+            const radiusSlider = document.getElementById('radius-slider');
+            const radiusValue = document.getElementById('radius-value');
+            const increaseBtn = document.getElementById('increase-slider-value-button');
+            const decreaseBtn = document.getElementById('decrease-slider-value-button');
+            const resetBtn = document.getElementById('reset');
             
+            // Canvas sizing
             canvas.width = 800;
             canvas.height = 600;
             
@@ -408,6 +472,44 @@
                     canvas.style.height = canvas.height + 'px';
                 }
             }
+            
+            // Show/hide radius controls based on selected algorithm
+            algorithmSelect.addEventListener('change', function() {
+                if (this.value === 'CircleMidpoint') {
+                    radiusContainer.style.display = 'flex';
+                } else {
+                    radiusContainer.style.display = 'none';
+                }
+            });
+            
+            // Radius slider functionality
+            radiusSlider.addEventListener('input', function() {
+                radiusValue.textContent = this.value;
+            });
+            
+            // Increase radius button
+            increaseBtn.addEventListener('click', function() {
+                let currentValue = parseInt(radiusSlider.value);
+                if (currentValue < parseInt(radiusSlider.max)) {
+                    radiusSlider.value = currentValue + 1;
+                    radiusValue.textContent = radiusSlider.value;
+                }
+            });
+            
+            // Decrease radius button
+            decreaseBtn.addEventListener('click', function() {
+                let currentValue = parseInt(radiusSlider.value);
+                if (currentValue > parseInt(radiusSlider.min)) {
+                    radiusSlider.value = currentValue - 1;
+                    radiusValue.textContent = radiusSlider.value;
+                }
+            });
+            
+            // Reset canvas
+            resetBtn.addEventListener('click', function() {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
             
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
